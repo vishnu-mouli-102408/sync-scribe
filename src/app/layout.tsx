@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Real Time Notes",
-	description: "This is a real time notes app built with Tailwind CSS and websockets.",
+	title: "Sync Scribe",
+	description:
+		"SyncScribe lets you create, edit, and share notes with seamless real-time collaboration. Instantly sync changes across users, manage permissions like Google Docs, and stay connected effortlessly!",
 };
 
 export default function RootLayout({
