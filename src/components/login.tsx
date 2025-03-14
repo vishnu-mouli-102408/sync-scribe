@@ -16,7 +16,7 @@ export default function LoginPage() {
 						<Link href="/" aria-label="go home" className="mx-auto block w-fit">
 							<Logo />
 						</Link>
-						<h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to Tailus UI</h1>
+						<h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to Sync Scribe</h1>
 						<p className="text-sm">Welcome back! Sign in to continue</p>
 					</div>
 
