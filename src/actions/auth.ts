@@ -90,6 +90,27 @@ export async function signIn(formData: LoginForm) {
 		};
 	}
 
+	const { data: existingUser } = await supabase
+		.from("user_profiles")
+		.select("*")
+		.eq("email", credentials.email)
+		.limit(1)
+		.single();
+
+	if (!existingUser) {
+		const { error: insertError } = await supabase.from("user_profiles").insert({
+			email: data?.user?.email,
+		});
+
+		if (insertError) {
+			console.error("Error inserting user profile:", insertError);
+			return {
+				status: insertError?.code || 500,
+				message: insertError?.message || "Internal Server Error",
+			};
+		}
+	}
+
 	revalidatePath("/", "layout");
 	return {
 		status: 200,
