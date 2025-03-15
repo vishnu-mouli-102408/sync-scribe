@@ -170,6 +170,9 @@ export async function signInwithGithub() {
 		},
 	});
 
+	console.log("GITHUB ERROR", error);
+	console.log("GITHUB DATA", data);
+
 	if (error) {
 		redirect("/error");
 	} else if (data?.url) {
@@ -187,6 +190,9 @@ export async function signInwithGoogle() {
 			redirectTo: `${origin}/auth/callback`,
 		},
 	});
+
+	console.log("GOOGLE ERROR", error);
+	console.log("GOOGLE DATA", data);
 
 	if (error) {
 		redirect("/error");
