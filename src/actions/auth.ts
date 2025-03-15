@@ -3,6 +3,7 @@
 import { LoginForm, SignUpForm } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function signUp(formData: SignUpForm) {
 	const supabase = await createClient();
@@ -94,5 +95,24 @@ export async function signIn(formData: LoginForm) {
 		status: 200,
 		message: "User logged in",
 		user: data?.user,
+	};
+}
+
+export async function signOut() {
+	const supabase = await createClient();
+	const { error } = await supabase.auth.signOut();
+
+	if (error) {
+		redirect("/error");
+		return {
+			status: error?.status || 500,
+			message: error?.message || "Internal Server Error",
+		};
+	}
+
+	revalidatePath("/", "layout");
+	return {
+		status: 200,
+		message: "User logged out",
 	};
 }

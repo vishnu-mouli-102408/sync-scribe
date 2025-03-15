@@ -1,12 +1,15 @@
 "use client";
 import Link from "next/link";
 import { Logo } from "./logo";
-import { Menu, X } from "lucide-react";
+import { Loader2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
+import { signOut } from "@/actions/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface HeroHeaderProps {
 	user: User | null;
@@ -15,6 +18,7 @@ interface HeroHeaderProps {
 export const HeroHeader = ({ user }: HeroHeaderProps) => {
 	const [menuState, setMenuState] = useState(false);
 	const [isScrolled, setIsScrolled] = useState(false);
+	const [loggingOut, setLoggingOut] = useState(false);
 
 	console.log("USER CLIENT", user);
 
@@ -25,6 +29,45 @@ export const HeroHeader = ({ user }: HeroHeaderProps) => {
 		window.addEventListener("scroll", handleScroll);
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
+
+	const router = useRouter();
+
+	const handleLogOut = async () => {
+		console.log("LOGOUT");
+		setLoggingOut(true);
+		try {
+			const response = await signOut();
+			console.log("LOGOUT RESPONSE", response);
+
+			if (response?.status === 200) {
+				router.push("/sign-in");
+				toast.success(response.message, {
+					description: "User Logged Out successfully",
+					duration: 3000,
+					position: "bottom-center",
+					closeButton: true,
+				});
+			} else {
+				toast.error(response.message, {
+					description: "There was an error logging out. Please try again later.",
+					duration: 3000,
+					position: "bottom-center",
+					closeButton: true,
+				});
+			}
+		} catch (error) {
+			console.log("LOGOUT ERROR", error);
+			toast.error("Oops! Something went wrong.", {
+				description: "There was an error logging out. Please try again later.",
+				duration: 3000,
+				position: "bottom-center",
+				closeButton: true,
+			});
+		} finally {
+			setLoggingOut(false);
+		}
+	};
+
 	return (
 		<header>
 			<nav data-state={menuState && "active"} className="fixed z-20 w-full px-2">
@@ -53,11 +96,28 @@ export const HeroHeader = ({ user }: HeroHeaderProps) => {
 						<div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
 							<div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
 								{user ? (
-									<Button asChild size="sm" className={cn(isScrolled && "lg:hidden")}>
-										<Link href="/explore">
-											<span>Start Writing</span>
-										</Link>
-									</Button>
+									<>
+										<Button asChild size="sm" variant="outline" className={cn(isScrolled && "lg:hidden")}>
+											<Link href="/explore">
+												<span>Start Writing</span>
+											</Link>
+										</Button>
+										<Button
+											onClick={handleLogOut}
+											asChild
+											size="sm"
+											className={cn("cursor-pointer", isScrolled && "lg:hidden")}
+										>
+											{loggingOut ? (
+												<span>
+													<Loader2 className="w-4 h-4 animate-spin " />
+													Logging Out...
+												</span>
+											) : (
+												<span>Logout</span>
+											)}
+										</Button>
+									</>
 								) : (
 									<>
 										<Button asChild variant="outline" size="sm" className={cn(isScrolled && "lg:hidden")}>
@@ -75,7 +135,7 @@ export const HeroHeader = ({ user }: HeroHeaderProps) => {
 
 								<Button asChild size="sm" className={cn(isScrolled ? "lg:inline-flex" : "hidden")}>
 									<Link href={user ? "/explore" : "/sign-up"}>
-										<span>Get Strated</span>
+										<span>{user ? "Explore" : "Get Strated"}</span>
 									</Link>
 								</Button>
 							</div>
