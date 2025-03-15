@@ -161,6 +161,7 @@ export async function getuserSession() {
 
 export async function signInwithGithub() {
 	const origin = (await headers()).get("origin");
+	console.log("ORIGIN", origin);
 	const supabase = await createClient();
 	const { data, error } = await supabase.auth.signInWithOAuth({
 		provider: "github",
@@ -177,6 +178,8 @@ export async function signInwithGithub() {
 }
 export async function signInwithGoogle() {
 	const origin = (await headers()).get("origin");
+	console.log("ORIGIN", origin);
+
 	const supabase = await createClient();
 	const { data, error } = await supabase.auth.signInWithOAuth({
 		provider: "google",
