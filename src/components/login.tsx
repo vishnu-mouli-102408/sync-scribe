@@ -2,7 +2,9 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 import Link from "next/link";
+import GithubIcon from "../../public/github.svg";
 
 export default function LoginPage() {
 	return (
@@ -23,9 +25,9 @@ export default function LoginPage() {
 					<div className="mt-6 space-y-6">
 						<div className="space-y-2">
 							<Label htmlFor="email" className="block text-sm">
-								Username
+								Email Address
 							</Label>
-							<Input type="email" required name="email" id="email" />
+							<Input placeholder="Enter Email Address" type="email" required name="email" id="email" />
 						</div>
 
 						<div className="space-y-0.5">
@@ -34,15 +36,22 @@ export default function LoginPage() {
 									Password
 								</Label>
 								<Button asChild variant="link" size="sm">
-									<Link href="#" className="link intent-info variant-ghost text-sm">
+									<Link href="/forgot-password" className="link intent-info variant-ghost text-sm">
 										Forgot your Password ?
 									</Link>
 								</Button>
 							</div>
-							<Input type="password" required name="pwd" id="pwd" className="input sz-md variant-mixed" />
+							<Input
+								placeholder="Enter Password"
+								type="password"
+								required
+								name="pwd"
+								id="pwd"
+								className="input sz-md variant-mixed"
+							/>
 						</div>
 
-						<Button className="w-full">Sign In</Button>
+						<Button className="w-full cursor-pointer">Sign In</Button>
 					</div>
 
 					<div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
@@ -52,7 +61,7 @@ export default function LoginPage() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
-						<Button type="button" variant="outline">
+						<Button type="button" className="cursor-pointer" variant="outline">
 							<svg xmlns="http://www.w3.org/2000/svg" width="0.98em" height="1em" viewBox="0 0 256 262">
 								<path
 									fill="#4285f4"
@@ -73,14 +82,9 @@ export default function LoginPage() {
 							</svg>
 							<span>Google</span>
 						</Button>
-						<Button type="button" variant="outline">
-							<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
-								<path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
-								<path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
-								<path fill="#00adef" d="M121.663 256.002H0V134.336h121.663z"></path>
-								<path fill="#fbbc09" d="M256 256.002H134.335V134.336H256z"></path>
-							</svg>
-							<span>Microsoft</span>
+						<Button type="button" className="cursor-pointer" variant="outline">
+							<Image src={GithubIcon} alt="Github Icon" width={20} height={20} className="" />
+							<span>Github</span>
 						</Button>
 					</div>
 				</div>

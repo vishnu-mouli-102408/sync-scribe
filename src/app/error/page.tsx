@@ -1,14 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AlertCircle, Home, RefreshCcw } from "lucide-react";
-import { useEffect } from "react";
+import { AlertCircle, Home } from "lucide-react";
 
-export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-	useEffect(() => {
-		console.error(error);
-	}, [error]);
-
+export default function Error() {
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-slate-900">
 			<div className="relative">
@@ -66,15 +61,6 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 						</motion.p>
 
 						<div className="flex gap-4">
-							<motion.button
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								onClick={reset}
-								className="flex items-center cursor-pointer gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-							>
-								<RefreshCcw size={20} />
-								Try Again
-							</motion.button>
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
