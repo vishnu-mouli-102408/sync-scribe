@@ -1,6 +1,6 @@
 "use server";
 
-import { SignUpForm } from "@/lib/types";
+import { LoginForm, SignUpForm } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -67,5 +67,32 @@ export async function resendVerificationEmail(email: string) {
 	return {
 		status: 200,
 		message: "Verification email resent",
+	};
+}
+
+export async function signIn(formData: LoginForm) {
+	const supabase = await createClient();
+	const credentials = {
+		email: formData.email,
+		password: formData.password,
+	};
+
+	const { error, data } = await supabase.auth.signInWithPassword({
+		email: credentials.email,
+		password: credentials.password,
+	});
+
+	if (error) {
+		return {
+			status: error?.status || 500,
+			message: error?.message || "Internal Server Error",
+		};
+	}
+
+	revalidatePath("/", "layout");
+	return {
+		status: 200,
+		message: "User logged in",
+		user: data?.user,
 	};
 }

@@ -3,14 +3,22 @@ import Link from "next/link";
 import { Logo } from "./logo";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import React from "react";
+
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
 
-export const HeroHeader = () => {
-	const [menuState, setMenuState] = React.useState(false);
-	const [isScrolled, setIsScrolled] = React.useState(false);
+interface HeroHeaderProps {
+	user: User | null;
+}
 
-	React.useEffect(() => {
+export const HeroHeader = ({ user }: HeroHeaderProps) => {
+	const [menuState, setMenuState] = useState(false);
+	const [isScrolled, setIsScrolled] = useState(false);
+
+	console.log("USER CLIENT", user);
+
+	useEffect(() => {
 		const handleScroll = () => {
 			setIsScrolled(window.scrollY > 50);
 		};
@@ -44,18 +52,29 @@ export const HeroHeader = () => {
 
 						<div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
 							<div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-								<Button asChild variant="outline" size="sm" className={cn(isScrolled && "lg:hidden")}>
-									<Link href="/sign-in">
-										<span>Login</span>
-									</Link>
-								</Button>
-								<Button asChild size="sm" className={cn(isScrolled && "lg:hidden")}>
-									<Link href="/sign-up">
-										<span>Sign Up</span>
-									</Link>
-								</Button>
+								{user ? (
+									<Button asChild size="sm" className={cn(isScrolled && "lg:hidden")}>
+										<Link href="/explore">
+											<span>Start Writing</span>
+										</Link>
+									</Button>
+								) : (
+									<>
+										<Button asChild variant="outline" size="sm" className={cn(isScrolled && "lg:hidden")}>
+											<Link href="/sign-in">
+												<span>Login</span>
+											</Link>
+										</Button>
+										<Button asChild size="sm" className={cn(isScrolled && "lg:hidden")}>
+											<Link href="/sign-up">
+												<span>Sign Up</span>
+											</Link>
+										</Button>
+									</>
+								)}
+
 								<Button asChild size="sm" className={cn(isScrolled ? "lg:inline-flex" : "hidden")}>
-									<Link href="/sign-up">
+									<Link href={user ? "/explore" : "/sign-up"}>
 										<span>Get Strated</span>
 									</Link>
 								</Button>
