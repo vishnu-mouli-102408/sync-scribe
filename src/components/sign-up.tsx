@@ -1,3 +1,5 @@
+"use client";
+
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,12 +7,82 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import GithubIcon from "../../public/github.svg";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { SignUpForm, signUpFormSchema } from "@/lib/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUp } from "@/actions/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
+	const {
+		register,
+		formState: { errors },
+		handleSubmit,
+	} = useForm<SignUpForm>({
+		resolver: zodResolver(signUpFormSchema),
+		mode: "onChange",
+	});
+
+	const router = useRouter();
+	const [loading, setLoading] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+
+	async function onSubmit(values: SignUpForm) {
+		setLoading(true);
+		try {
+			// ✅ This will be type-safe and validated.
+			console.log("VALUES", values);
+
+			const response = await signUp(values);
+			console.log("RESPONSE", response);
+
+			if (response?.status === 200) {
+				toast.success(response.message, {
+					duration: 3000,
+					position: "bottom-center",
+					description: "User created successfully",
+					closeButton: true,
+				});
+				router.push(`/verify?email=${values.email}`);
+			} else if (response?.status === 400) {
+				toast.error(response.message, {
+					duration: 3000,
+					position: "bottom-center",
+					description: "User with this email already exists",
+					closeButton: true,
+				});
+			} else {
+				toast.error(response.message, {
+					duration: 3000,
+					position: "bottom-center",
+					description: "Internal Server Error",
+					closeButton: true,
+				});
+			}
+		} catch (error) {
+			console.error("Error during signup:", error);
+
+			// Show a generic error message
+			toast.error("Something went wrong. Please try again later.", {
+				duration: 3000,
+				position: "bottom-center",
+				closeButton: true,
+			});
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	console.log("ERRORS", errors);
+
 	return (
-		<section className="flex min-h-screen bg-zinc-50 px-4  dark:bg-transparent">
+		<section className="flex min-h-screen bg-zinc-50 px-4 py-10 dark:bg-transparent">
 			<form
-				action=""
+				noValidate
+				onSubmit={handleSubmit(onSubmit)}
 				className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
 			>
 				<div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
@@ -28,13 +100,31 @@ export default function SignupPage() {
 								<Label htmlFor="firstname" className="block text-sm">
 									Firstname
 								</Label>
-								<Input placeholder="Enter First Name" type="text" required name="firstname" id="firstname" />
+								<Input
+									{...register("firstName")}
+									placeholder="Enter First Name"
+									type="text"
+									required
+									name="firstName"
+									id="firstName"
+								/>
+								{errors?.firstName && (
+									<p className="text-red-500 text-sm">{errors?.firstName?.message || "Required"}</p>
+								)}
 							</div>
 							<div className="space-y-2">
 								<Label htmlFor="lastname" className="block text-sm">
 									Lastname
 								</Label>
-								<Input placeholder="Enter Last Name" type="text" required name="lastname" id="lastname" />
+								<Input
+									{...register("lastName")}
+									placeholder="Enter Last Name"
+									type="text"
+									required
+									name="lastName"
+									id="lastName"
+								/>
+								{errors?.lastName && <p className="text-red-500 text-sm">{errors?.lastName?.message || "Required"}</p>}
 							</div>
 						</div>
 
@@ -42,26 +132,64 @@ export default function SignupPage() {
 							<Label htmlFor="email" className="block text-sm">
 								Email Address
 							</Label>
-							<Input placeholder="Enter Email Address" type="email" required name="email" id="email" />
+							<Input
+								{...register("email")}
+								placeholder="Enter Email Address"
+								type="email"
+								required
+								name="email"
+								id="email"
+							/>
+							{errors?.email && <p className="text-red-500 text-sm">{errors?.email?.message || "Email is required"}</p>}
 						</div>
 
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
-								<Label htmlFor="pwd" className="text-title text-sm">
+								<Label htmlFor="password" className="text-title text-sm">
 									Password
 								</Label>
 							</div>
-							<Input
-								placeholder="Enter Password"
-								type="password"
-								required
-								name="pwd"
-								id="pwd"
-								className="input sz-md variant-mixed"
-							/>
+							<div className="relative">
+								<Input
+									{...register("password")}
+									placeholder="Enter Password"
+									type={showPassword ? "text" : "password"}
+									required
+									name="password"
+									id="password"
+									className="input sz-md variant-mixed"
+								/>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="absolute mt-0.5 mr-0.5 cursor-pointer right-0 top-0 h-max px-3 py-2 hover:bg-transparent"
+									onClick={() => setShowPassword((prev) => !prev)}
+									disabled={loading}
+								>
+									{showPassword && !loading ? (
+										<EyeIcon className="h-4 w-4" aria-hidden="true" />
+									) : (
+										<EyeOffIcon className="h-4 w-4" aria-hidden="true" />
+									)}
+									<span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+								</Button>
+							</div>
+							{errors?.password && (
+								<p className="text-red-500 text-sm">{errors?.password?.message || "Password is required"}</p>
+							)}
 						</div>
 
-						<Button className="w-full cursor-pointer">Sign Up</Button>
+						<Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+							{loading ? (
+								<>
+									<Loader2 className="w-4 h-4 animate-spin mr-2" />
+									Submitting...
+								</>
+							) : (
+								"Sign Up"
+							)}
+						</Button>
 					</div>
 
 					<div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
