@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function signUp(formData: SignUpForm) {
+	const origin = (await headers()).get("origin");
 	const supabase = await createClient();
 	const credentials = {
 		email: formData.email,
@@ -23,6 +24,7 @@ export async function signUp(formData: SignUpForm) {
 				firstName: credentials.firstName,
 				lastName: credentials.lastName,
 			},
+			emailRedirectTo: `${origin}/sign-in`,
 		},
 	});
 

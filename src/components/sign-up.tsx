@@ -59,7 +59,7 @@ export default function SignupPage() {
 				toast.success(response.message, {
 					duration: 3000,
 					position: "bottom-center",
-					description: "User created successfully",
+					description: "Please Verify your email to continue",
 					closeButton: true,
 				});
 				router.push(`/verify?email=${values.email}`);
