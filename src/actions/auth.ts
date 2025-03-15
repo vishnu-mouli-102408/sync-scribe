@@ -194,3 +194,58 @@ export async function signInwithGoogle() {
 		redirect(data.url);
 	}
 }
+
+export async function forgotPassword(email: string) {
+	const supabase = await createClient();
+	const origin = (await headers()).get("origin");
+	console.log("ORIGIN", origin);
+
+	const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+		redirectTo: `${origin}/reset-password`,
+	});
+
+	if (error) {
+		console.error("Error sending reset password email:", error);
+		return {
+			status: error?.status || 500,
+			message: error?.message || "Internal Server Error",
+		};
+	}
+
+	console.log("Reset password email sent:", data);
+	return {
+		status: 200,
+		message: "Reset password email sent",
+	};
+}
+
+export async function resetPassword(password: string, token: string) {
+	const supabase = await createClient();
+	const { data, error } = await supabase.auth.exchangeCodeForSession(token);
+
+	if (error) {
+		console.error("Error resetting password:", error);
+		return {
+			status: error?.status || 500,
+			message: error?.message || "Internal Server Error",
+		};
+	}
+
+	const { error: userError } = await supabase.auth.updateUser({
+		password,
+	});
+
+	if (userError) {
+		console.error("Error updating password:", userError);
+		return {
+			status: userError?.status || 500,
+			message: userError?.message || "Internal Server Error",
+		};
+	}
+
+	console.log("Password reset:", data);
+	return {
+		status: 200,
+		message: "Password reset successfully",
+	};
+}

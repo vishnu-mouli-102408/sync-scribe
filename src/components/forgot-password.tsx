@@ -1,15 +1,68 @@
+"use client";
+
 import Link from "next/link";
-import React from "react";
+import { useState } from "react";
 import { Logo } from "./logo";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { forgotPassword } from "@/actions/auth";
+import { useRouter } from "next/navigation";
 
 const ForgotPassword = () => {
+	const router = useRouter();
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<{ email: string }>({
+		resolver: zodResolver(
+			z.object({
+				email: z.string().email({ message: "Invalid email address" }),
+			})
+		),
+		mode: "onChange",
+	});
+
+	const [loading, setLoading] = useState(false);
+
+	const onSubmit = async (values: { email: string }) => {
+		console.log("Forgot Password", values);
+		try {
+			setLoading(true);
+			const result = await forgotPassword(values.email);
+			if (result?.status === 200) {
+				toast.success(result.message, {
+					duration: 3000,
+					position: "bottom-center",
+				});
+				router.push("/verify-password");
+			} else {
+				toast.error(result.message || "Error sending reset password email", {
+					duration: 3000,
+					position: "bottom-center",
+				});
+			}
+		} catch (error) {
+			console.error("Error sending reset password email:", error);
+			toast.error("Error sending reset password email", {
+				duration: 3000,
+				position: "bottom-center",
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<section className="flex min-h-screen bg-zinc-50 px-4  dark:bg-transparent">
 			<form
-				action=""
+				onSubmit={handleSubmit(onSubmit)}
 				className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
 			>
 				<div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
@@ -28,10 +81,20 @@ const ForgotPassword = () => {
 							<Label htmlFor="email" className="block text-sm">
 								Email Address
 							</Label>
-							<Input placeholder="Enter Email Address" type="email" required name="email" id="email" />
+							<Input
+								{...register("email")}
+								placeholder="Enter Email Address"
+								type="email"
+								required
+								name="email"
+								id="email"
+							/>
+							{errors?.email && <p className="text-red-500 text-sm">{errors?.email?.message || "Email is required"}</p>}
 						</div>
 
-						<Button className="w-full cursor-pointer">Submit</Button>
+						<Button disabled={loading} type="submit" className="w-full cursor-pointer">
+							{loading ? "Sending email..." : "Send Reset Password Email"}
+						</Button>
 					</div>
 				</div>
 			</form>
