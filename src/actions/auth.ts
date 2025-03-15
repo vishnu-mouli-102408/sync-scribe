@@ -137,3 +137,21 @@ export async function signOut() {
 		message: "User logged out",
 	};
 }
+
+export async function getuserSession() {
+	const supabase = await createClient();
+	const { data, error } = await supabase.auth.getUser();
+
+	if (!data || error) {
+		return {
+			status: 401,
+			message: "Unauthorized",
+		};
+	}
+
+	return {
+		status: 200,
+		message: "User session found",
+		user: data?.user,
+	};
+}
