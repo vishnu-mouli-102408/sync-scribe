@@ -3,6 +3,7 @@
 import { LoginForm, SignUpForm } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function signUp(formData: SignUpForm) {
@@ -154,4 +155,37 @@ export async function getuserSession() {
 		message: "User session found",
 		user: data?.user,
 	};
+}
+
+export async function signInwithGithub() {
+	const origin = (await headers()).get("origin");
+	const supabase = await createClient();
+	const { data, error } = await supabase.auth.signInWithOAuth({
+		provider: "github",
+		options: {
+			redirectTo: `${origin}/auth/callback`,
+		},
+	});
+
+	if (error) {
+		redirect("/error");
+	} else if (data?.url) {
+		redirect(data.url);
+	}
+}
+export async function signInwithGoogle() {
+	const origin = (await headers()).get("origin");
+	const supabase = await createClient();
+	const { data, error } = await supabase.auth.signInWithOAuth({
+		provider: "google",
+		options: {
+			redirectTo: `${origin}/auth/callback`,
+		},
+	});
+
+	if (error) {
+		redirect("/error");
+	} else if (data?.url) {
+		redirect(data.url);
+	}
 }

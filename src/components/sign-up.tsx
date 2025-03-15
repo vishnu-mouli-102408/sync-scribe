@@ -10,10 +10,10 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { SignUpForm, signUpFormSchema } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp } from "@/actions/auth";
+import { signInwithGithub, signInwithGoogle, signUp } from "@/actions/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
@@ -29,6 +29,22 @@ export default function SignupPage() {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+
+	const [isGithubPending, startGithubTransition] = useTransition();
+
+	const [isGooglePending, startGoogleTransition] = useTransition();
+
+	const handleGithubClick = () => {
+		startGithubTransition(async () => {
+			await signInwithGithub();
+		});
+	};
+
+	const handleGoogleClick = () => {
+		startGoogleTransition(async () => {
+			await signInwithGoogle();
+		});
+	};
 
 	async function onSubmit(values: SignUpForm) {
 		setLoading(true);
@@ -199,7 +215,7 @@ export default function SignupPage() {
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
-						<Button type="button" className="cursor-pointer" variant="outline">
+						<Button onClick={handleGoogleClick} type="button" className="cursor-pointer" variant="outline">
 							<svg xmlns="http://www.w3.org/2000/svg" width="0.98em" height="1em" viewBox="0 0 256 262">
 								<path
 									fill="#4285f4"
@@ -218,11 +234,11 @@ export default function SignupPage() {
 									d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
 								></path>
 							</svg>
-							<span>Google</span>
+							<span>{isGooglePending ? "Signing in..." : "Google"}</span>
 						</Button>
-						<Button type="button" className="cursor-pointer" variant="outline">
+						<Button onClick={handleGithubClick} type="button" className="cursor-pointer" variant="outline">
 							<Image src={GithubIcon} alt="Github Icon" width={20} height={20} className="" />
-							<span>Github</span>
+							<span>{isGithubPending ? "Signing in..." : "Github"}</span>
 						</Button>
 					</div>
 				</div>
