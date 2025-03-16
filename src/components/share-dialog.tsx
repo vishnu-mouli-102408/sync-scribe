@@ -31,6 +31,7 @@ ShareDialogProps) {
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [fetchingShares, setFetchingShares] = useState(false);
 
 	const isOwner = currentUserId === ownerId;
 
@@ -49,13 +50,18 @@ ShareDialogProps) {
 		})[]
 	>([]);
 
+	console.log("sharedEmails", sharedEmails);
+
 	useEffect(() => {
 		async function fetchShares() {
+			setFetchingShares(true);
 			try {
 				const sharesData = await getDocumentShares(documentId);
 				setSharedEmails(sharesData);
 			} catch (error) {
 				console.error("Failed to fetch document shares:", error);
+			} finally {
+				setFetchingShares(false);
 			}
 		}
 
@@ -229,7 +235,13 @@ ShareDialogProps) {
 							</h3>
 
 							<AnimatePresence>
-								{sharedEmails.length === 0 ? (
+								{fetchingShares ? (
+									<div className="w-full gap-x-2 flex ml-4 justify-start items-center">
+										<div className="w-3 bg-[#d7bace] h-3 rounded-full animate-pulse"></div>
+										<div className="w-3  h-3 bg-[#988f9e] rounded-full animate-pulse"></div>
+										<div className="w-3 h-3  bg-[#d9d7e4] rounded-full animate-pulse"></div>
+									</div>
+								) : sharedEmails.length === 0 ? (
 									<motion.p
 										className="text-gray-500 text-sm italic py-2"
 										initial={{ opacity: 0 }}

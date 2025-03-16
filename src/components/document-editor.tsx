@@ -12,7 +12,7 @@ import UserCursor from "./user-cursor";
 import ShareDialog from "./share-dialog";
 import RichTextEditor from "./rich-text-editor";
 import { motion } from "motion/react";
-import { Trash2, Share2, Loader2 } from "lucide-react";
+import { Trash2, Share2, Loader2, ArrowLeftIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface DocumentEditorProps {
@@ -58,6 +58,8 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 
 	const editorRef = useRef<HTMLDivElement>(null);
 
+	console.log("PRESENCE", presence);
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const tipTapRef = useRef<any>(null);
 	const presenceChannel = useRef<RealtimeChannel | null>(null);
@@ -82,8 +84,12 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 			});
 
 			channel.on("presence", { event: "sync" }, () => {
+				console.log("Presence sync event received");
 				const state = channel.presenceState();
 				const presenceData: DocumentPresence = {};
+				console.log("Presence state:", state);
+				console.log("Presence Data:", presenceData);
+
 				Object.entries(state).forEach(([key, value]) => {
 					if (Array.isArray(value) && value.length > 0) {
 						const presence = value[0] as unknown as UserPresence;
@@ -95,13 +101,18 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 
 			// Listen for content changes from other users
 			channel.on("broadcast", { event: "content_change" }, ({ payload }) => {
+				console.log("Received content change:", payload, user);
+
 				if (payload.userId !== user.id) {
+					console.log("Updating content...");
 					isLocalChange.current = true;
 					setContent(payload.content);
 				}
 			});
 
 			channel.on("broadcast", { event: "presence" }, ({ payload }) => {
+				console.log("Received presence change:", payload);
+
 				if (payload.type === "join") {
 					const { key, presence } = payload;
 					setPresence((prev) => ({ ...prev, [key]: presence as UserPresence }));
@@ -116,6 +127,7 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 			});
 
 			await channel.subscribe(async (status) => {
+				console.log("Presence channel status:", status);
 				if (status === "SUBSCRIBED") {
 					await channel.track({
 						user: {
@@ -139,7 +151,7 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 				presenceChannel.current.unsubscribe();
 			}
 		};
-	}, [user?.id, id, supabase, user?.email]);
+	}, [user?.id, id, supabase, user?.email, user]);
 
 	// HANDLE LIVE CARET (selection-change)
 	useEffect(() => {
@@ -252,6 +264,8 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 
 	// BROADCAST CONTENT CHANGES
 	const broadcastContentChange = debounce(async (newContent: string) => {
+		console.log("Broadcasting content change...", newContent, presenceChannel.current, user?.id, isLocalChange.current);
+
 		if (!presenceChannel.current || !user?.id || isLocalChange.current) {
 			isLocalChange.current = false;
 			return;
@@ -297,14 +311,17 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 					transition={{ duration: 0.3 }}
 				>
 					<div className="flex justify-between items-center mb-6">
-						<motion.h1
-							className="text-3xl font-bold text-white"
-							initial={{ opacity: 0, x: -20 }}
-							animate={{ opacity: 1, x: 0 }}
-							transition={{ delay: 0.2, duration: 0.4 }}
-						>
-							Edit Document
-						</motion.h1>
+						<div className="flex items-center gap-4">
+							<ArrowLeftIcon className="cursor-pointer" onClick={() => router.push("/explore")} />
+							<motion.h1
+								className="text-3xl font-bold text-white"
+								initial={{ opacity: 0, x: -20 }}
+								animate={{ opacity: 1, x: 0 }}
+								transition={{ delay: 0.2, duration: 0.4 }}
+							>
+								Edit Document
+							</motion.h1>
+						</div>
 
 						<div className="flex items-center gap-6">
 							<motion.div
@@ -412,10 +429,10 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({ id }) => {
 
 				{showShareDialog && (
 					<motion.div
-						initial={{ opacity: 0, scale: 0.9 }}
-						animate={{ opacity: 1, scale: 1 }}
-						exit={{ opacity: 0, scale: 0.9 }}
-						transition={{ type: "spring", stiffness: 300, damping: 25 }}
+					// initial={{ opacity: 0, scale: 0.9 }}
+					// animate={{ opacity: 1, scale: 1 }}
+					// exit={{ opacity: 0, scale: 0.9 }}
+					// transition={{ type: "spring", stiffness: 300, damping: 25 }}
 					>
 						<ShareDialog
 							documentId={id}

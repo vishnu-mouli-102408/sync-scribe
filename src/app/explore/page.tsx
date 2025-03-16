@@ -127,6 +127,7 @@ const DocumentsPage = () => {
 
 		setSelectedDoc(doc);
 		setShowShareDialog(true);
+		toast.success("Document shared successfully");
 	};
 
 	const handleDocumentClick = (docId: string) => {
@@ -192,14 +193,12 @@ const DocumentsPage = () => {
 				</div>
 
 				{loading ? (
-					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-						<motion.div
-							animate={{ rotate: 360 }}
-							transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-							className="w-16 h-16 border-4 border-zinc-800 border-t-pink-500 rounded-full mx-auto mb-4"
-						></motion.div>
-						<p className="text-gray-400 text-lg mt-4">Loading your documents...</p>
-					</motion.div>
+					<div className="flex items-center justify-center">
+						<div className="text-center">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+							<p className="mt-4 text-gray-400">Loading...</p>
+						</div>
+					</div>
 				) : documents.length === 0 ? (
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
@@ -239,12 +238,12 @@ const DocumentsPage = () => {
 												v{doc.version}
 											</motion.div>
 
-											<h2 className="text-lg font-semibold text-gray-100 truncate pr-16 group-hover:text-pink-400 transition-colors">
+											<h2 className="text-lg font-semibold text-gray-100 truncate pr-16 group-hover:text-purple-400 transition-colors">
 												{doc.content
 													.replace(/<[^>]+>/g, "")
 													.split(" ")
 													.slice(0, 5)
-													.join(" ")}
+													.join(" ")}{" "}
 												...
 											</h2>
 

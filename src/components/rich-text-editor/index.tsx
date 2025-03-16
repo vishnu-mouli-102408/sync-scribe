@@ -5,13 +5,17 @@ import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import MenuBar from "./menu-bar";
+import { useEffect } from "react";
 
 interface RichTextEditorProps {
 	content: string;
 	onChange: (content: string) => void;
 }
 const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
+	console.log("CONTENT RICH TEXT EDITOR", content);
+
 	const editor = useEditor({
+		immediatelyRender: false,
 		extensions: [
 			StarterKit.configure({
 				bulletList: {
@@ -41,6 +45,23 @@ const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 			onChange(editor.getHTML());
 		},
 	});
+
+	// Add this effect to update the editor when content prop changes
+	useEffect(() => {
+		if (editor && content !== editor.getHTML()) {
+			// Prevent onChange from firing during external updates
+			const currentOnUpdate = editor.options.onUpdate;
+			editor.options.onUpdate = () => {};
+
+			// Set content from props
+			editor.commands.setContent(content);
+
+			// Restore the onUpdate handler
+			setTimeout(() => {
+				editor.options.onUpdate = currentOnUpdate;
+			}, 0);
+		}
+	}, [content, editor]);
 
 	return (
 		<div className="max-w-4xl mx-auto py-8">
